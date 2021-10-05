@@ -1,0 +1,27 @@
+import numpy as np
+import math as mt
+
+print('Test 1 with 1')
+
+n=0
+a=np.float32(1+2**(-n))
+b=np.float32(1)
+while np.float32(a)!=np.float32(b):
+    n=n+1
+    a=1+2**(-n)
+    
+print (n-1)
+print (2**(-(n-1)))
+
+
+
+print('Test 2 with 1000')
+n=0
+z=np.float32(1024+2**(-n))
+x=np.float32(1024)
+while np.float32(z)!=np.float32(x):
+    n=n+1
+    z=1024+2**(-n)
+    
+print (n-1)
+print (2**(-(n-1)))
