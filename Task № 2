@@ -31,7 +31,7 @@ def diсhotomy(a, b):
             b = (b + a) * 0.5
         else:
             a = (b + a) * 0.5
-    print('Diсhotomy method:', '\n-E_0/U =', a,'\nf(x) = ', f(a), '\n', 'Number of iterations = ', i , '\n')
+    print('Diсhotomy method:', '\n-E_0/U =', (a + b) * ,'\nf(x) = ', f(a), '\n', 'Number of iterations = ', i , '\n')
 
      
 def simple_iterations(a, b):
