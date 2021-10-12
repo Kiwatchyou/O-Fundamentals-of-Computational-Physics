@@ -1,0 +1,90 @@
+import numpy as np
+import math as m
+
+
+U0=5
+a=4.
+A=2.*(a**2)*U0
+accuracy=1e-15
+max_n=A/m.pi
+
+
+def f(x):
+    return m.cos(m.sqrt(A * (1 - x)))/m.sin(m.sqrt(A * (1 - x))) - m.sqrt((1 / x) - 1)
+
+
+def df(x):
+    return A / ((m.sin(m.sqrt(A * ( 1 - x ))))** 2 * 2 * m.sqrt(A * (1 - x))) + 1 / (x ** 2 * 2 * m.sqrt((1 / x) - 1))
+
+
+def interval(n):
+    a = 1 - m.pi ** 2 * (n + 1) ** 2 / (A ** 2) + accuracy
+    b = 1 - m.pi ** 2 * n ** 2 / (A ** 2) - accuracy
+    return a , b
+
+
+def diсhotomy(a, b):
+    i = 0
+    while (b - a) * 0.5 > accuracy:
+        i += 1
+        if f(a) * f((a + b) * 0.5) <= 0:
+            b = (b + a) * 0.5
+        else:
+            a = (b + a) * 0.5
+    print('Diсhotomy method:', '\n-E_0/U =', a,'\nf(x) = ', f(a), '\n', 'Number of iterations = ', i , '\n')
+
+     
+def simple_iterations(a, b):
+    x = (b + a) * 0.5
+    i = 0
+    while True:
+        i += 1
+        lyam = 1 / df(x)
+        phi = x - lyam * f(x)
+        x1 = phi
+        if abs(x - x1) < accuracy:
+            break
+        x = x1
+    print('Simple iterations method:', '\n-E_0/U =', x1,'\nf(x) = ', f(x1), '\n', 'Number of iterations = ', i , '\n')
+
+
+def newton_method(a, b):
+    i = 0
+    x1 = 0.
+    x = b
+    while x > a:
+        i += 1
+        x1 = x
+        x = x1 - f(x1) / (df(x1))
+        if abs(x - x1) < accuracy and abs(f(x)) < 1e-5:
+            break
+    print('Newton method:', '\n-E_0/U =', x1,'\nf(x) = ', f(x1), '\n', 'Number of iterations = ', i , '\n')
+
+    
+def secant(a, b):
+    i = 0
+    dx = (b - a) / 1000
+    x = b
+    while True:
+        i += 1
+        x1 = x
+        if (x1 + dx) > b:
+            x = x1 - f(x1) * dx / (f(x1) - f(x1 - dx))
+        else:
+            x = x1 - f(x1) * 2 * dx / (f(x1 + dx) - f(x1 - dx))
+        if abs(x - x1) < accuracy:
+            break
+    print('Secant method:', '\n-E_0/U =', x1,'\nf(x) = ', f(x1), '\n', 'Number of iterations = ', i , '\n')   
+    
+    
+if __name__ == '__main__':
+    print("Maximum energy level:", int(max_n) - 1, "\nEnter energy level, you need:\n")
+    n=int(input())
+    if n <= (max_n-1):
+        a , b = interval(n)
+        diсhotomy(a, b)
+        simple_iterations(a, b)
+        newton_method(a, b)
+        secant(a, b)
+    else:
+        print ("Incorrect task")
