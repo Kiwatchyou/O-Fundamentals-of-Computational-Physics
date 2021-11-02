@@ -1,0 +1,32 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+Nt=80000 # количество отрезков
+Nx=160000 # количество точек x
+
+
+def func_Bes(x, t, m):
+    return np.cos(m*t - x*np.sin(t))
+
+def Simpson(N, x, m):
+    sum = 0
+    h = 2 * np.pi / N
+    for i in range(1, N, 2):
+        sum += 4 * func_Bes(x, h * i, m) * h / 3
+    for j in range(2, N, 2):
+        sum += 2 * func_Bes(x, h * j, m) * h / 3
+    sum += h * (func_Bes(x, 0, m) + func_Bes(x, 2 * np.pi, m)) / 3
+    return sum
+
+
+
+if __name__ == '__main__':
+    x = np.linspace(0, 2 * np.pi, Nx)
+    dx = 2 * np.pi / (Nx - 1) 
+    der_Bessel=np.array((Simpson(Nt, dx+x, 0) - Simpson(Nt, -dx + x, 0))/(2 * dx))
+    Bessel_func_1 = np.array(Simpson(Nt, x, 1)) 
+    eq=der_Bessel + Bessel_func_1
+    
+    plt.plot(x,eq)
+    plt.show()
+
