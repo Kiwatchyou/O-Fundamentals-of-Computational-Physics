@@ -1,0 +1,164 @@
+import numpy as np
+import math as m
+from matplotlib import pyplot as plt
+from numpy.fft import fft, ifft, fftfreq 
+
+
+# id_t(A) = 2|A|^2 * A + d_xx (A)
+# -L<x<L, L = 10
+# A(L,0) = (c * lam) / (cosh(lam * x))
+
+
+
+
+ # Initialization --------------------------------------------------------------
+
+lam = 2
+c = 4
+
+
+N = 1000
+L = 10.0
+x0, xN = -L, L
+h = (xN-x0)/N
+
+
+Nt = 1000
+t0, tN = 0, 100
+tau = (tN-t0)/Nt
+
+
+t = [t for t in np.arange(t0, tN, tau)]
+x = [x for x in np.arange(x0, xN, h)]
+
+
+
+# Own Fourier transform --------------------------------------------------------------
+
+def Fourier_matrix_rev(n):
+    row = np.arange(0, n, 1)
+    i = -1j
+    row = np.exp(2*np.pi*i*row/n)
+    matr = np.array([row**j for j in range(n)])
+    return matr
+
+
+
+def Fourier_matrix_dir(n):
+    row = np.arange(0, n, 1)
+    i = 1j
+    row = np.exp(2*np.pi*i*row/n)
+    matr = np.array([row**j for j in range(n)])
+    C_plus = 1/n
+    return C_plus*matr
+
+
+F_dir = Fourier_matrix_dir (N)
+F_rev = Fourier_matrix_rev (N)
+
+# Main_functions --------------------------------------------------------------
+
+
+
+def A_t0(x):
+    return (c*lam/(m.cosh(lam*x)))
+
+
+def A_and_check_init(Nx,N_t):
+    A = np.zeros((Nx,N_t))
+    fA = np.zeros ((Nx,N_t))
+    for i in range (Nx):
+        A[i,0] = A_t0(x[i])
+    fA[:,0] =  abs(fft(A[:,0],Nx))
+    return A, fA
+
+
+
+def split_method(a0,a,Nx):
+    a = a * np.exp(-2j * tau *(abs(a))**2)
+    # c = abs(fft(a,Nx))
+    c = abs(F_dir.dot(a))
+    # a = fft(a,Nx)
+    a = F_dir.dot(a)
+    a = a * np.exp (-1j * tau * fftfreq(Nx,h)**2)
+    # a = np.abs(ifft(a,Nx))
+    a = abs(F_rev.dot(a))
+    return (a, c)    
+
+
+def A_and_check_create (Nx,N_t):
+    b, fA = A_and_check_init(Nx,N_t)
+    for tj in range (1,N_t):
+        psi = np.copy(b[:,tj-1])
+        psi_fin, psi_fA= split_method(b[:,0],psi,Nx)
+        b[:,tj] = psi_fin
+        fA[:,tj] = psi_fA
+    return b, fA
+
+
+
+# Show functions --------------------------------------------------------------
+
+def show_check(f,Nx,N_t,step):
+    buf = np.copy(f)
+    for tj in range (1,N_t):
+        if (tj % step) == 0:
+            c = np.roll(buf[:,tj], N//2)
+            wspace = np.roll(fftfreq(Nx,h), N//2)
+            plt.plot(wspace,c ,label ='time step '+ str(tj))
+            plt.xlabel("k")
+            plt.ylabel("|A(k)|")
+            plt.title("Checking the nonlinear step")
+            plt.legend()
+            plt.show()
+    return 0
+
+
+def show_abs_A_x(f,Nx,N_t,step):
+    buf = np.copy(f)
+    for tj in range (1,N_t):
+        if (tj % step) == 0:
+            plt.plot(x,buf[:,tj] ,label ='time step '+ str(tj), color = 'red')
+            plt.xlabel("x")
+            plt.ylabel("|A(x)|")
+            plt.title("Checking the signal")
+            plt.legend()
+            plt.show()
+    return 0
+    
+    
+    
+# 3D graph creation function --------------------------------------------------------------
+ 
+def im_make(f):
+    u = np.transpose (f)
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    X, T = np.meshgrid(x, t) 
+    ax = plt.axes(projection ='3d')
+    ax.plot_surface(X, T, u, rstride=1, cstride=1,cmap='viridis')
+    ax.set_zlabel('|A|')
+    ax.set_xlabel('x')
+    ax.set_ylabel('t')
+    ax.view_init(20, 50)
+    plt.show()
+    return
+    
+
+if __name__ == '__main__':
+    u, check = A_and_check_create (N,Nt)   
+    
+    
+    print ('What should I show? |A(w)| in real time - 1; |A(w)| in real time - 2; 3D surface |A(x,t)| - 3. \n')
+    temp1 = int(input ())
+    
+    if (temp1 == 1):
+        show_check(check, N, Nt, 2)
+        
+    if (temp1 == 2):
+        show_abs_A_x (u, N, Nt, 2) 
+
+    if (temp1 == 3):
+        im_make(u)
+
+    
